@@ -1,0 +1,81 @@
+server:
+  port: 8089
+  servlet:
+    context-path: /demo
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/test0815?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  
+  # Spring Boot Admin Client 配置
+  boot:
+    admin:
+      client:
+        # Admin Server 地址（先配置为本地，后面启动 Admin Server 后可以看到这个客户端）
+        url: http://localhost:8090
+        # 应用实例信息
+        instance:
+          name: ${spring.application.name:demo-swagger}
+          service-url: http://localhost:${server.port}${server.servlet.context-path:/}
+          management-url: http://localhost:${server.port}${server.servlet.context-path:/}actuator
+          health-url: http://localhost:${server.port}${server.servlet.context-path:/}actuator/health
+          metadata:
+            tags:
+              environment: development
+              team: demo-team
+  
+  # 应用信息配置
+  application:
+    name: demo-swagger
+
+# Actuator 监控端点配置
+management:
+  endpoints:
+    web:
+      exposure:
+        # 暴露所有端点（生产环境建议只暴露必要的端点）
+        include: "*"
+      base-path: /actuator
+      # 允许跨域
+      cors:
+        allowed-origins: "*"
+        allowed-methods: GET,POST
+  endpoint:
+    health:
+      # 显示详细健康信息
+      show-details: always
+      show-components: always
+    # 启用 shutdown 端点（生产环境谨慎使用）
+    shutdown:
+      enabled: true
+  info:
+    # 启用各种信息收集
+    env:
+      enabled: true
+    java:
+      enabled: true
+    os:
+      enabled: true
+  metrics:
+    export:
+      # 启用指标导出
+      simple:
+        enabled: true
+
+# 应用信息（会显示在 /actuator/info 端点）
+info:
+  app:
+    name: ${spring.application.name}
+    description: "Spring Boot Swagger Demo with MySQL"
+    version: "1.0.0-SNAPSHOT"
+    encoding: "UTF-8"
+    java:
+      version: ${java.version}
+  build:
+    timestamp: "@timestamp@"
+  contact:
+    email: "demo@example.com"
+    phone: "123-456-7890"

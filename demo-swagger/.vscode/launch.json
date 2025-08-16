@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-SpringBootDemoSwaggerApplication<demo-swagger>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.xkcoding.swagger.SpringBootDemoSwaggerApplication",
+            "projectName": "demo-swagger",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
