@@ -1,7 +1,6 @@
 package com.xkcoding.swagger.common;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,50 +21,50 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(value = "分页响应", description = "Page Response")
+@Schema(description = "分页响应")
 public class PageResponse<T> implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
      * 当前页码
      */
-    @ApiModelProperty(value = "当前页码", required = true, example = "1")
+    @Schema(description = "当前页码", example = "1")
     private Integer currentPage;
 
     /**
      * 每页大小
      */
-    @ApiModelProperty(value = "每页大小", required = true, example = "10")
+    @Schema(description = "每页大小", example = "10")
     private Integer pageSize;
 
     /**
      * 总记录数
      */
-    @ApiModelProperty(value = "总记录数", required = true, example = "100")
+    @Schema(description = "总记录数", example = "100")
     private Long totalCount;
 
     /**
      * 总页数
      */
-    @ApiModelProperty(value = "总页数", required = true, example = "10")
+    @Schema(description = "总页数", example = "10")
     private Integer totalPages;
 
     /**
      * 是否有下一页
      */
-    @ApiModelProperty(value = "是否有下一页", required = true, example = "true")
+    @Schema(description = "是否有下一页", example = "true")
     private Boolean hasNext;
 
     /**
      * 是否有上一页
      */
-    @ApiModelProperty(value = "是否有上一页", required = true, example = "false")
+    @Schema(description = "是否有上一页", example = "false")
     private Boolean hasPrevious;
 
     /**
      * 数据列表
      */
-    @ApiModelProperty(value = "数据列表", required = true)
+    @Schema(description = "数据列表")
     private List<T> data;
 
     /**

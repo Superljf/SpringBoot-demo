@@ -3,9 +3,9 @@ package com.xkcoding.swagger.controller;
 import com.xkcoding.swagger.annotation.WebLog;
 import com.xkcoding.swagger.common.ApiResponse;
 import com.xkcoding.swagger.entity.User;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,13 +24,13 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/log-demo")
-@Api(tags = "Log Demo", description = "AOP 日志记录示例", value = "AOP 日志记录示例")
+@Tag(name = "AOP 日志示例", description = "AOP 切面日志记录功能演示")
 @Slf4j
 public class LogDemoController {
 
     @GetMapping("/simple")
     @WebLog(value = "简单GET请求示例", logArgs = true, logResult = true, logTime = true)
-    @ApiOperation(value = "简单GET请求", notes = "演示基本的日志记录功能")
+    @Operation(summary = "简单GET请求", description = "演示基本的日志记录功能")
     public ApiResponse<String> simpleGet() {
         return ApiResponse.<String>builder()
                 .code(200)
@@ -41,10 +41,9 @@ public class LogDemoController {
 
     @GetMapping("/with-params")
     @WebLog(value = "带参数的GET请求示例")
-    @ApiOperation(value = "带参数的GET请求", notes = "演示参数记录功能")
-    @ApiImplicitParam(name = "name", value = "用户名", dataType = "string", paramType = "query", defaultValue = "张三")
-    public ApiResponse<Map<String, Object>> getWithParams(@RequestParam String name, 
-                                                         @RequestParam(defaultValue = "18") Integer age) {
+    @Operation(summary = "带参数的GET请求", description = "演示参数记录功能")
+    public ApiResponse<Map<String, Object>> getWithParams(@Parameter(description = "用户名", example = "张三") @RequestParam String name, 
+                                                         @Parameter(description = "年龄", example = "18") @RequestParam(defaultValue = "18") Integer age) {
         Map<String, Object> result = new HashMap<>();
         result.put("name", name);
         result.put("age", age);
@@ -60,7 +59,7 @@ public class LogDemoController {
 
     @PostMapping("/with-body")
     @WebLog(value = "POST请求示例，记录请求体", logArgs = true, logResult = true)
-    @ApiOperation(value = "POST请求示例", notes = "演示请求体记录功能")
+    @Operation(summary = "POST请求示例", description = "演示请求体记录功能")
     public ApiResponse<User> postWithBody(@RequestBody User user) {
         // 模拟业务处理
         if (user.getId() == null) {
@@ -78,7 +77,7 @@ public class LogDemoController {
 
     @GetMapping("/slow-method")
     @WebLog(value = "慢方法示例，测试执行时间记录", logTime = true)
-    @ApiOperation(value = "慢方法示例", notes = "演示执行时间记录功能")
+    @Operation(summary = "慢方法示例", description = "演示执行时间记录功能")
     public ApiResponse<Map<String, Object>> slowMethod() {
         try {
             // 模拟耗时操作
@@ -101,9 +100,8 @@ public class LogDemoController {
 
     @GetMapping("/error-demo")
     @WebLog(value = "异常处理示例", logException = true)
-    @ApiOperation(value = "异常处理示例", notes = "演示异常记录功能")
-    @ApiImplicitParam(name = "throwError", value = "是否抛出异常", dataType = "boolean", paramType = "query", defaultValue = "false")
-    public ApiResponse<String> errorDemo(@RequestParam(defaultValue = "false") Boolean throwError) {
+    @Operation(summary = "异常处理示例", description = "演示异常记录功能")
+    public ApiResponse<String> errorDemo(@Parameter(description = "是否抛出异常", example = "false") @RequestParam(defaultValue = "false") Boolean throwError) {
         if (throwError) {
             throw new RuntimeException("这是一个测试异常，用于演示异常日志记录功能");
         }
@@ -117,7 +115,7 @@ public class LogDemoController {
 
     @PutMapping("/selective-log")
     @WebLog(value = "选择性日志记录示例", logArgs = false, logResult = false, logTime = true, logException = true)
-    @ApiOperation(value = "选择性日志记录", notes = "演示选择性记录功能（只记录时间和异常）")
+    @Operation(summary = "选择性日志记录", description = "演示选择性记录功能（只记录时间和异常）")
     public ApiResponse<String> selectiveLog(@RequestBody Map<String, Object> data) {
         log.info("这是业务层的日志，参数: {}", data);
         
@@ -129,7 +127,7 @@ public class LogDemoController {
     }
 
     @GetMapping("/no-log")
-    @ApiOperation(value = "无日志记录", notes = "此方法没有 @WebLog 注解，不会记录AOP日志")
+    @Operation(summary = "无日志记录", description = "此方法没有 @WebLog 注解，不会记录AOP日志")
     public ApiResponse<String> noLog() {
         log.info("这是普通的业务日志，不会被AOP拦截");
         

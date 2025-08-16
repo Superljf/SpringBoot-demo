@@ -1,8 +1,8 @@
 package com.xkcoding.swagger.controller;
 
 import com.xkcoding.swagger.common.ApiResponse;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -23,7 +23,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/monitor")
-@Api(tags = "Monitor", description = "应用监控相关接口", value = "应用监控相关接口")
+@Tag(name = "应用监控", description = "应用监控相关接口")
 public class MonitorController implements HealthIndicator {
 
     private final JdbcTemplate jdbcTemplate;
@@ -57,7 +57,7 @@ public class MonitorController implements HealthIndicator {
     }
 
     @GetMapping("/status")
-    @ApiOperation(value = "获取应用状态信息", notes = "返回应用的基本状态信息")
+    @Operation(summary = "获取应用状态信息", description = "返回应用的基本状态信息")
     public ApiResponse<Map<String, Object>> getStatus() {
         Map<String, Object> status = new HashMap<>();
         
@@ -111,7 +111,7 @@ public class MonitorController implements HealthIndicator {
     }
 
     @GetMapping("/metrics")
-    @ApiOperation(value = "获取应用指标", notes = "返回应用的性能指标")
+    @Operation(summary = "获取应用指标", description = "返回应用的性能指标")
     public ApiResponse<Map<String, Object>> getMetrics() {
         Map<String, Object> metrics = new HashMap<>();
         

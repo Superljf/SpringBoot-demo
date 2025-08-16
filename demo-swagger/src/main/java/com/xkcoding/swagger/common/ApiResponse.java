@@ -1,7 +1,6 @@
 package com.xkcoding.swagger.common;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,22 +20,22 @@ import java.io.Serializable;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(value = "通用PI接口返回", description = "Common Api Response")
+@Schema(description = "通用API接口返回")
 public class ApiResponse<T> implements Serializable {
     private static final long serialVersionUID = -8987146499044811408L;
     /**
      * 通用返回状态
      */
-    @ApiModelProperty(value = "通用返回状态", required = true)
+    @Schema(description = "通用返回状态", example = "200")
     private Integer code;
     /**
      * 通用返回信息
      */
-    @ApiModelProperty(value = "通用返回信息", required = true)
+    @Schema(description = "通用返回信息", example = "操作成功")
     private String message;
     /**
      * 通用返回数据
      */
-    @ApiModelProperty(value = "通用返回数据", required = true)
+    @Schema(description = "通用返回数据")
     private T data;
 }

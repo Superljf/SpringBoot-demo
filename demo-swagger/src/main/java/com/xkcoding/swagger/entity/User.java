@@ -1,7 +1,6 @@
 package com.xkcoding.swagger.entity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,22 +18,22 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(value = "用户实体", description = "User Entity")
+@Schema(description = "用户实体")
 public class User implements Serializable {
     private static final long serialVersionUID = 5057954049311281252L;
     /**
      * 主键id
      */
-    @ApiModelProperty(value = "主键id", required = true)
+    @Schema(description = "主键id", example = "1")
     private Integer id;
     /**
      * 用户名
      */
-    @ApiModelProperty(value = "用户名", required = true)
+    @Schema(description = "用户名", example = "张三")
     private String name;
     /**
      * 工作岗位
      */
-    @ApiModelProperty(value = "工作岗位", required = true)
+    @Schema(description = "工作岗位", example = "前端开发")
     private String job;
 }

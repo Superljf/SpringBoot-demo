@@ -3,10 +3,9 @@ package com.xkcoding.swagger.controller;
 import com.xkcoding.swagger.common.ApiResponse;
 import com.xkcoding.swagger.common.PageResponse;
 import com.xkcoding.swagger.entity.User;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -26,7 +25,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/db")
-@Api(tags = "Database", description = "MySQL 数据库操作示例", value = "MySQL 数据库操作示例")
+@Tag(name = "数据库操作", description = "MySQL 数据库操作示例")
 public class DbController {
     private final JdbcTemplate jdbcTemplate;
 
@@ -35,7 +34,7 @@ public class DbController {
     }
 
     @GetMapping("/ping")
-    @ApiOperation(value = "数据库连通性检查", notes = "测试数据库连接是否正常")
+    @Operation(summary = "数据库连通性检查", description = "测试数据库连接是否正常")
     public ApiResponse<String> ping() {
         try {
             Integer one = jdbcTemplate.queryForObject("SELECT 1", Integer.class);
@@ -47,7 +46,7 @@ public class DbController {
     }
 
     @GetMapping("/users")
-    @ApiOperation(value = "查询用户列表", notes = "获取所有用户信息")
+    @Operation(summary = "查询用户列表", description = "获取所有用户信息")
     public ApiResponse<List<User>> listUsers() {
         try {
             List<User> users = jdbcTemplate.query(
@@ -61,9 +60,8 @@ public class DbController {
     }
 
     @GetMapping("/users/{id}")
-    @ApiOperation(value = "根据ID查询用户", notes = "根据用户ID查询单个用户信息")
-    @ApiImplicitParam(name = "id", value = "用户ID", required = true, dataType = "int", paramType = "path")
-    public ApiResponse<User> getUserById(@PathVariable Integer id) {
+    @Operation(summary = "根据ID查询用户", description = "根据用户ID查询单个用户信息")
+    public ApiResponse<User> getUserById(@Parameter(description = "用户ID", example = "1") @PathVariable Integer id) {
         try {
             User user = jdbcTemplate.queryForObject(
                     "SELECT id, name, job FROM t_user WHERE id = ?",
@@ -77,7 +75,7 @@ public class DbController {
     }
 
     @PostMapping("/users")
-    @ApiOperation(value = "新增用户", notes = "添加新用户到数据库")
+    @Operation(summary = "新增用户", description = "添加新用户到数据库")
     public ApiResponse<User> addUser(@RequestBody User user) {
         try {
             final String sql = "INSERT INTO t_user(name, job) VALUES(?, ?)";
@@ -98,9 +96,8 @@ public class DbController {
     }
 
     @PutMapping("/users/{id}")
-    @ApiOperation(value = "更新用户", notes = "根据ID更新用户信息")
-    @ApiImplicitParam(name = "id", value = "用户ID", required = true, dataType = "int", paramType = "path")
-    public ApiResponse<User> updateUser(@PathVariable Integer id, @RequestBody User user) {
+    @Operation(summary = "更新用户", description = "根据ID更新用户信息")
+    public ApiResponse<User> updateUser(@Parameter(description = "用户ID", example = "1") @PathVariable Integer id, @RequestBody User user) {
         try {
             int affected = jdbcTemplate.update(
                     "UPDATE t_user SET name = ?, job = ? WHERE id = ?",
@@ -119,9 +116,8 @@ public class DbController {
     }
 
     @DeleteMapping("/users/{id}")
-    @ApiOperation(value = "删除用户", notes = "根据ID删除用户")
-    @ApiImplicitParam(name = "id", value = "用户ID", required = true, dataType = "int", paramType = "path")
-    public ApiResponse<String> deleteUser(@PathVariable Integer id) {
+    @Operation(summary = "删除用户", description = "根据ID删除用户")
+    public ApiResponse<String> deleteUser(@Parameter(description = "用户ID", example = "1") @PathVariable Integer id) {
         try {
             int affected = jdbcTemplate.update("DELETE FROM t_user WHERE id = ?", id);
 
@@ -136,7 +132,7 @@ public class DbController {
     }
 
     @GetMapping("/count")
-    @ApiOperation(value = "统计用户数量", notes = "获取用户总数")
+    @Operation(summary = "统计用户数量", description = "获取用户总数")
     public ApiResponse<Integer> countUsers() {
         try {
             Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM t_user", Integer.class);
@@ -147,20 +143,13 @@ public class DbController {
     }
 
     @GetMapping("/users/page")
-    @ApiOperation(value = "分页查询用户", notes = "支持分页、排序和关键字搜索的用户查询")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "page", value = "页码（从1开始）", dataType = "int", paramType = "query", defaultValue = "1"),
-            @ApiImplicitParam(name = "size", value = "每页大小", dataType = "int", paramType = "query", defaultValue = "10"),
-            @ApiImplicitParam(name = "keyword", value = "搜索关键字（用户名或岗位）", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "sortBy", value = "排序字段（id/name/job）", dataType = "string", paramType = "query", defaultValue = "id"),
-            @ApiImplicitParam(name = "sortDir", value = "排序方向（asc/desc）", dataType = "string", paramType = "query", defaultValue = "desc")
-    })
+    @Operation(summary = "分页查询用户", description = "支持分页、排序和关键字搜索的用户查询")
     public ApiResponse<PageResponse<User>> getUsersWithPage(
-            @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer size,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "desc") String sortDir) {
+            @Parameter(description = "页码（从1开始）", example = "1") @RequestParam(defaultValue = "1") Integer page,
+            @Parameter(description = "每页大小", example = "10") @RequestParam(defaultValue = "10") Integer size,
+            @Parameter(description = "搜索关键字（用户名或岗位）") @RequestParam(required = false) String keyword,
+            @Parameter(description = "排序字段（id/name/job）", example = "id") @RequestParam(defaultValue = "id") String sortBy,
+            @Parameter(description = "排序方向（asc/desc）", example = "desc") @RequestParam(defaultValue = "desc") String sortDir) {
 
         try {
             // 参数校验
