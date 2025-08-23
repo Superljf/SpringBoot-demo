@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>编辑定时任务</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <!-- 页面标题 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2><i class="fas fa-edit"></i> 编辑定时任务</h2>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/demo">首页</a></li>
+                        <li class="breadcrumb-item"><a href="/demo/schedule/index">定时任务管理</a></li>
+                        <li class="breadcrumb-item active">编辑任务</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+
+        <!-- 错误信息 -->
+        <div th:if="${error}" class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span th:text="${error}"></span>
+        </div>
+
+        <!-- 任务信息 -->
+        <div class="row" th:if="${job}">
+            <div class="col-md-8 mx-auto">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-cog"></i> 任务配置
+                            <span class="badge bg-primary ms-2" th:text="${job.jobName}"></span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- 基本信息（只读） -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">任务名称</label>
+                                <input type="text" class="form-control" th:value="${job.jobName}" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">任务组名</label>
+                                <input type="text" class="form-control" th:value="${job.jobGroup}" readonly>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <label class="form-label">任务类名</label>
+                                <input type="text" class="form-control" th:value="${job.jobClassName}" readonly>
+                            </div>
+                        </div>
+
+                        <!-- 可编辑的Cron表达式 -->
+                        <div class="mb-4">
+                            <label for="cronExpression" class="form-label">
+                                <i class="fas fa-clock text-success"></i> Cron表达式 <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="cronExpression" 
+                                       th:value="${job.cronExpression}" required>
+                                <button type="button" class="btn btn-outline-secondary" onclick="validateCron()">
+                                    <i class="fas fa-check"></i> 验证
+                                </button>
+                            </div>
+                            <div class="form-text">
+                                修改任务的执行时间，
+                                <a href="#" onclick="showCronHelp()">查看帮助</a>
+                            </div>
+                            <div id="cronValidation" class="form-text"></div>
+                        </div>
+
+                        <!-- 任务状态信息 -->
+                        <div class="mb-4">
+                            <label class="form-label">当前状态</label>
+                            <div>
+                                <span th:if="${job.status == 1}" class="badge bg-success fs-6">
+                                    <i class="fas fa-play"></i> 正常运行
+                                </span>
+                                <span th:if="${job.status == 0}" class="badge bg-warning fs-6">
+                                    <i class="fas fa-pause"></i> 已暂停
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- 执行时间信息 -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">下次执行时间</label>
+                                <input type="text" class="form-control" 
+                                       th:value="${job.nextFireTime != null ? #temporals.format(job.nextFireTime, 'yyyy-MM-dd HH:mm:ss') : '无'}" 
+                                       readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">上次执行时间</label>
+                                <input type="text" class="form-control" 
+                                       th:value="${job.prevFireTime != null ? #temporals.format(job.prevFireTime, 'yyyy-MM-dd HH:mm:ss') : '无'}" 
+                                       readonly>
+                            </div>
+                        </div>
+
+                        <!-- 操作按钮 -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="/demo/schedule/index" class="btn btn-secondary me-md-2">
+                                <i class="fas fa-arrow-left"></i> 返回列表
+                            </a>
+                            
+                            <!-- 立即执行 -->
+                            <button type="button" class="btn btn-outline-primary me-md-2" onclick="runJobNow()">
+                                <i class="fas fa-play"></i> 立即执行
+                            </button>
+                            
+                            <!-- 暂停/恢复 -->
+                            <button th:if="${job.status == 1}" type="button" class="btn btn-outline-warning me-md-2" onclick="pauseJob()">
+                                <i class="fas fa-pause"></i> 暂停任务
+                            </button>
+                            <button th:if="${job.status == 0}" type="button" class="btn btn-outline-success me-md-2" onclick="resumeJob()">
+                                <i class="fas fa-play"></i> 恢复任务
+                            </button>
+                            
+                            <!-- 保存修改 -->
+                            <button type="button" class="btn btn-primary" onclick="updateJob()">
+                                <i class="fas fa-save"></i> 保存修改
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cron帮助模态框 -->
+        <div class="modal fade" id="cronHelpModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Cron表达式帮助</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <h6>格式说明：</h6>
+                        <p><code>秒 分 时 日 月 周 [年]</code></p>
+                        
+                        <h6>常用示例：</h6>
+                        <table class="table table-sm">
+                            <tr><td><code>0 0/5 * * * ?</code></td><td>每5分钟执行一次</td></tr>
+                            <tr><td><code>0 0 2 * * ?</code></td><td>每天凌晨2点执行</td></tr>
+                            <tr><td><code>0 0 10,14,16 * * ?</code></td><td>每天上午10点，下午2点，4点执行</td></tr>
+                            <tr><td><code>0 0/30 9-17 * * ?</code></td><td>朝九晚五工作时间内每半小时执行</td></tr>
+                            <tr><td><code>0 0 12 ? * WED</code></td><td>每个星期三中午12点执行</td></tr>
+                            <tr><td><code>0 0 12 1 * ?</code></td><td>每月1号中午12点执行</td></tr>
+                        </table>
+                        
+                        <h6>特殊字符：</h6>
+                        <ul>
+                            <li><code>*</code>：匹配任意值</li>
+                            <li><code>?</code>：用于日和周字段，表示不指定值</li>
+                            <li><code>-</code>：表示范围</li>
+                            <li><code>,</code>：表示列表</li>
+                            <li><code>/</code>：表示增量</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script th:inline="javascript">
+        // 获取任务信息
+        const jobName = /*[[${job.jobName}]]*/ '';
+        const jobGroup = /*[[${job.jobGroup}]]*/ '';
+
+        // 更新任务
+        function updateJob() {
+            const cronExpression = document.getElementById('cronExpression').value;
+            
+            if (!cronExpression) {
+                alert('请输入Cron表达式');
+                return;
+            }
+
+            if (confirm('确定要更新任务的Cron表达式吗？')) {
+                fetch(`/demo/schedule/api/jobs/${jobName}/${jobGroup}/cron?cronExpression=${encodeURIComponent(cronExpression)}`, {
+                    method: 'PUT'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.code === 200) {
+                        alert('任务更新成功！');
+                        location.reload();
+                    } else {
+                        alert('任务更新失败：' + data.message);
+                    }
+                })
+                .catch(error => {
+                    alert('更新失败：' + error.message);
+                });
+            }
+        }
+
+        // 立即执行任务
+        function runJobNow() {
+            if (confirm('确定要立即执行任务吗？')) {
+                fetch(`/demo/schedule/api/jobs/${jobName}/${jobGroup}/run`, {
+                    method: 'PUT'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.code === 200) {
+                        alert('任务执行成功！');
+                    } else {
+                        alert('任务执行失败：' + data.message);
+                    }
+                })
+                .catch(error => {
+                    alert('操作失败：' + error.message);
+                });
+            }
+        }
+
+        // 暂停任务
+        function pauseJob() {
+            if (confirm('确定要暂停任务吗？')) {
+                fetch(`/demo/schedule/api/jobs/${jobName}/${jobGroup}/pause`, {
+                    method: 'PUT'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.code === 200) {
+                        alert('任务暂停成功！');
+                        location.reload();
+                    } else {
+                        alert('任务暂停失败：' + data.message);
+                    }
+                })
+                .catch(error => {
+                    alert('操作失败：' + error.message);
+                });
+            }
+        }
+
+        // 恢复任务
+        function resumeJob() {
+            if (confirm('确定要恢复任务吗？')) {
+                fetch(`/demo/schedule/api/jobs/${jobName}/${jobGroup}/resume`, {
+                    method: 'PUT'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.code === 200) {
+                        alert('任务恢复成功！');
+                        location.reload();
+                    } else {
+                        alert('任务恢复失败：' + data.message);
+                    }
+                })
+                .catch(error => {
+                    alert('操作失败：' + error.message);
+                });
+            }
+        }
+
+        // 验证Cron表达式
+        function validateCron() {
+            const cronExpression = document.getElementById('cronExpression').value;
+            if (!cronExpression) {
+                alert('请输入Cron表达式');
+                return;
+            }
+
+            fetch(`/demo/schedule/api/cron/validate?cronExpression=${encodeURIComponent(cronExpression)}`)
+            .then(response => response.json())
+            .then(data => {
+                const validationDiv = document.getElementById('cronValidation');
+                if (data.code === 200) {
+                    validationDiv.innerHTML = '<span class="text-success"><i class="fas fa-check"></i> Cron表达式有效</span>';
+                } else {
+                    validationDiv.innerHTML = '<span class="text-danger"><i class="fas fa-times"></i> Cron表达式无效</span>';
+                }
+            })
+            .catch(error => {
+                document.getElementById('cronValidation').innerHTML = 
+                    '<span class="text-danger"><i class="fas fa-times"></i> 验证失败</span>';
+            });
+        }
+
+        // 显示Cron帮助
+        function showCronHelp() {
+            const modal = new bootstrap.Modal(document.getElementById('cronHelpModal'));
+            modal.show();
+        }
+    </script>
+</body>
+</html>

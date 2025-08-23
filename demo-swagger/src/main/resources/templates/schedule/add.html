@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新增定时任务</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <!-- 页面标题 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2><i class="fas fa-plus-circle"></i> 新增定时任务</h2>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/demo">首页</a></li>
+                        <li class="breadcrumb-item"><a href="/demo/schedule/index">定时任务管理</a></li>
+                        <li class="breadcrumb-item active">新增任务</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+
+        <!-- 任务表单 -->
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-cog"></i> 任务配置</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="jobForm">
+                            <!-- 任务名称 -->
+                            <div class="mb-3">
+                                <label for="jobName" class="form-label">
+                                    <i class="fas fa-tag text-primary"></i> 任务名称 <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="jobName" 
+                                       placeholder="请输入任务名称" required>
+                                <div class="form-text">任务的唯一标识名称</div>
+                            </div>
+
+                            <!-- 任务组名 -->
+                            <div class="mb-3">
+                                <label for="jobGroup" class="form-label">
+                                    <i class="fas fa-layer-group text-info"></i> 任务组名
+                                </label>
+                                <input type="text" class="form-control" id="jobGroup" 
+                                       placeholder="DEFAULT" value="DEFAULT">
+                                <div class="form-text">任务分组，默认为DEFAULT</div>
+                            </div>
+
+                            <!-- 任务描述 -->
+                            <div class="mb-3">
+                                <label for="description" class="form-label">
+                                    <i class="fas fa-comment text-secondary"></i> 任务描述
+                                </label>
+                                <textarea class="form-control" id="description" rows="3" 
+                                          placeholder="请输入任务描述"></textarea>
+                            </div>
+
+                            <!-- 任务类名 -->
+                            <div class="mb-3">
+                                <label for="jobClassName" class="form-label">
+                                    <i class="fas fa-code text-warning"></i> 任务类名 <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-control" id="jobClassName" required>
+                                    <option value="">请选择任务类</option>
+                                    <option th:each="jobClass : ${jobClasses}" 
+                                            th:value="${jobClass}" 
+                                            th:text="${jobClass}"></option>
+                                </select>
+                                <div class="form-text">选择要执行的任务类</div>
+                            </div>
+
+                            <!-- Cron表达式 -->
+                            <div class="mb-3">
+                                <label for="cronExpression" class="form-label">
+                                    <i class="fas fa-clock text-success"></i> Cron表达式 <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="cronExpression" 
+                                           placeholder="0 0/5 * * * ?" required>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="validateCron()">
+                                        <i class="fas fa-check"></i> 验证
+                                    </button>
+                                </div>
+                                <div class="form-text">
+                                    定时执行的Cron表达式，
+                                    <a href="#" onclick="showCronHelp()">查看帮助</a>
+                                </div>
+                                <div id="cronValidation" class="form-text"></div>
+                            </div>
+
+                            <!-- 任务参数 -->
+                            <div class="mb-3">
+                                <label for="jobData" class="form-label">
+                                    <i class="fas fa-database text-danger"></i> 任务参数
+                                </label>
+                                <textarea class="form-control" id="jobData" rows="3" 
+                                          placeholder="key1=value1,key2=value2"></textarea>
+                                <div class="form-text">任务执行时的参数，格式：key=value，多个参数用逗号分隔</div>
+                            </div>
+
+                            <!-- 任务状态 -->
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-toggle-on text-primary"></i> 初始状态
+                                </label>
+                                <div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="status" 
+                                               id="statusNormal" value="1" checked>
+                                        <label class="form-check-label" for="statusNormal">
+                                            <i class="fas fa-play text-success"></i> 正常
+                                        </label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="status" 
+                                               id="statusPaused" value="0">
+                                        <label class="form-check-label" for="statusPaused">
+                                            <i class="fas fa-pause text-warning"></i> 暂停
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 提交按钮 -->
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="/demo/schedule/index" class="btn btn-secondary me-md-2">
+                                    <i class="fas fa-times"></i> 取消
+                                </a>
+                                <button type="button" class="btn btn-outline-secondary me-md-2" onclick="resetForm()">
+                                    <i class="fas fa-undo"></i> 重置
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> 创建任务
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cron帮助模态框 -->
+        <div class="modal fade" id="cronHelpModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Cron表达式帮助</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <h6>格式说明：</h6>
+                        <p><code>秒 分 时 日 月 周 [年]</code></p>
+                        
+                        <h6>常用示例：</h6>
+                        <table class="table table-sm">
+                            <tr><td><code>0 0/5 * * * ?</code></td><td>每5分钟执行一次</td></tr>
+                            <tr><td><code>0 0 2 * * ?</code></td><td>每天凌晨2点执行</td></tr>
+                            <tr><td><code>0 0 10,14,16 * * ?</code></td><td>每天上午10点，下午2点，4点执行</td></tr>
+                            <tr><td><code>0 0/30 9-17 * * ?</code></td><td>朝九晚五工作时间内每半小时执行</td></tr>
+                            <tr><td><code>0 0 12 ? * WED</code></td><td>每个星期三中午12点执行</td></tr>
+                            <tr><td><code>0 0 12 1 * ?</code></td><td>每月1号中午12点执行</td></tr>
+                        </table>
+                        
+                        <h6>特殊字符：</h6>
+                        <ul>
+                            <li><code>*</code>：匹配任意值</li>
+                            <li><code>?</code>：用于日和周字段，表示不指定值</li>
+                            <li><code>-</code>：表示范围</li>
+                            <li><code>,</code>：表示列表</li>
+                            <li><code>/</code>：表示增量</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // 表单提交
+        document.getElementById('jobForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                jobName: document.getElementById('jobName').value,
+                jobGroup: document.getElementById('jobGroup').value || 'DEFAULT',
+                description: document.getElementById('description').value,
+                jobClassName: document.getElementById('jobClassName').value,
+                cronExpression: document.getElementById('cronExpression').value,
+                jobData: document.getElementById('jobData').value,
+                status: parseInt(document.querySelector('input[name="status"]:checked').value)
+            };
+
+            // 表单验证
+            if (!formData.jobName) {
+                alert('请输入任务名称');
+                return;
+            }
+            if (!formData.jobClassName) {
+                alert('请选择任务类');
+                return;
+            }
+            if (!formData.cronExpression) {
+                alert('请输入Cron表达式');
+                return;
+            }
+
+            // 提交数据
+            fetch('/demo/schedule/api/jobs', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 200) {
+                    alert('任务创建成功！');
+                    window.location.href = '/demo/schedule/index';
+                } else {
+                    alert('任务创建失败：' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('创建失败：' + error.message);
+            });
+        });
+
+        // 验证Cron表达式
+        function validateCron() {
+            const cronExpression = document.getElementById('cronExpression').value;
+            if (!cronExpression) {
+                alert('请输入Cron表达式');
+                return;
+            }
+
+            fetch(`/demo/schedule/api/cron/validate?cronExpression=${encodeURIComponent(cronExpression)}`)
+            .then(response => response.json())
+            .then(data => {
+                const validationDiv = document.getElementById('cronValidation');
+                if (data.code === 200) {
+                    validationDiv.innerHTML = '<span class="text-success"><i class="fas fa-check"></i> Cron表达式有效</span>';
+                } else {
+                    validationDiv.innerHTML = '<span class="text-danger"><i class="fas fa-times"></i> Cron表达式无效</span>';
+                }
+            })
+            .catch(error => {
+                document.getElementById('cronValidation').innerHTML = 
+                    '<span class="text-danger"><i class="fas fa-times"></i> 验证失败</span>';
+            });
+        }
+
+        // 显示Cron帮助
+        function showCronHelp() {
+            const modal = new bootstrap.Modal(document.getElementById('cronHelpModal'));
+            modal.show();
+        }
+
+        // 重置表单
+        function resetForm() {
+            document.getElementById('jobForm').reset();
+            document.getElementById('cronValidation').innerHTML = '';
+        }
+    </script>
+</body>
+</html>

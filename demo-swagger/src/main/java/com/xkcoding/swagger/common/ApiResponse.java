@@ -8,14 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-/**
- * <p>
- * 通用API接口返回
- * </p>
- *
- * @author yangkai.shen
- * @date Created in 2018-11-29 11:30
- */
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -38,4 +31,55 @@ public class ApiResponse<T> implements Serializable {
      */
     @Schema(description = "通用返回数据")
     private T data;
+
+    /**
+     * 成功返回（带数据）
+     */
+    public static <T> ApiResponse<T> success(T data) {
+        return ApiResponse.<T>builder()
+                .code(200)
+                .message("操作成功")
+                .data(data)
+                .build();
+    }
+
+    /**
+     * 成功返回（不带数据）
+     */
+    public static <T> ApiResponse<T> success() {
+        return success(null);
+    }
+
+    /**
+     * 成功返回（自定义消息）
+     */
+    public static <T> ApiResponse<T> success(String message) {
+        return ApiResponse.<T>builder()
+                .code(200)
+                .message(message)
+                .data(null)
+                .build();
+    }
+
+    /**
+     * 失败返回
+     */
+    public static <T> ApiResponse<T> error(String message) {
+        return ApiResponse.<T>builder()
+                .code(500)
+                .message(message)
+                .data(null)
+                .build();
+    }
+
+    /**
+     * 失败返回（自定义状态码）
+     */
+    public static <T> ApiResponse<T> error(Integer code, String message) {
+        return ApiResponse.<T>builder()
+                .code(code)
+                .message(message)
+                .data(null)
+                .build();
+    }
 }

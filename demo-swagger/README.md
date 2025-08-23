@@ -79,14 +79,7 @@
 ## Swagger2Config.java
 
 ```java
-/**
- * <p>
- * Swagger2 配置
- * </p>
- *
- * @author yangkai.shen
- * @date Created in 2018-11-29 11:14
- */
+
 @Configuration
 @EnableSwagger2
 public class Swagger2Config {
@@ -103,7 +96,6 @@ public class Swagger2Config {
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder().title("spring-boot-demo")
                 .description("这是一个简单的 Swagger API 演示")
-                .contact(new Contact("Yangkai.Shen", "http://xkcoding.com", "237497819@qq.com"))
                 .version("1.0.0-SNAPSHOT")
                 .build();
     }
@@ -116,14 +108,7 @@ public class Swagger2Config {
 > 主要演示API层的注解。
 
 ```java
-/**
- * <p>
- * User Controller
- * </p>
- *
- * @author yangkai.shen
- * @date Created in 2018-11-29 11:30
- */
+
 @RestController
 @RequestMapping("/user")
 @Api(tags = "1.0.0-SNAPSHOT", description = "用户管理", value = "用户管理")
@@ -202,14 +187,7 @@ public class UserController {
 > 主要演示了 实体类 的注解。
 
 ```java
-/**
- * <p>
- * 通用API接口返回
- * </p>
- *
- * @author yangkai.shen
- * @date Created in 2018-11-29 11:30
- */
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -264,3 +242,14 @@ curl http://localhost:8089/demo/actuator/metrics
 
 # 自定义状态接口
 curl http://localhost:8089/demo/monitor/status
+
+
+Controller 层：接收 HTTP 请求，返回响应。
+    
+Service 层：处理业务逻辑。
+
+DAO/Repository 层：操作数据库。
+
+Entity/Model 层：实体类，对应数据库表。
+
+Database：最终的数据存储。

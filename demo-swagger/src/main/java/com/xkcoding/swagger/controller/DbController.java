@@ -1,5 +1,6 @@
 package com.xkcoding.swagger.controller;
 
+import com.xkcoding.swagger.annotation.RequirePermission;
 import com.xkcoding.swagger.common.ApiResponse;
 import com.xkcoding.swagger.common.PageResponse;
 import com.xkcoding.swagger.entity.User;
@@ -9,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.PreparedStatement;
@@ -34,6 +36,7 @@ public class DbController {
     }
 
     @GetMapping("/ping")
+    @RequirePermission("db:read")
     @Operation(summary = "数据库连通性检查", description = "测试数据库连接是否正常")
     public ApiResponse<String> ping() {
         try {
@@ -46,12 +49,19 @@ public class DbController {
     }
 
     @GetMapping("/users")
+    @RequirePermission("db:read")
     @Operation(summary = "查询用户列表", description = "获取所有用户信息")
     public ApiResponse<List<User>> listUsers() {
         try {
             List<User> users = jdbcTemplate.query(
                     "SELECT id, name, job FROM t_user ORDER BY id DESC",
-                    (rs, rowNum) -> new User(rs.getInt("id"), rs.getString("name"), rs.getString("job"))
+                    (rs, rowNum) -> {
+                        User user = new User();
+                        user.setId(rs.getInt("id"));
+                        user.setName(rs.getString("name"));
+                        user.setJob(rs.getString("job"));
+                        return user;
+                    }
             );
             return ApiResponse.<List<User>>builder().code(200).message("查询成功").data(users).build();
         } catch (Exception e) {
@@ -60,12 +70,19 @@ public class DbController {
     }
 
     @GetMapping("/users/{id}")
+    @RequirePermission("db:read")
     @Operation(summary = "根据ID查询用户", description = "根据用户ID查询单个用户信息")
     public ApiResponse<User> getUserById(@Parameter(description = "用户ID", example = "1") @PathVariable Integer id) {
         try {
             User user = jdbcTemplate.queryForObject(
                     "SELECT id, name, job FROM t_user WHERE id = ?",
-                    (rs, rowNum) -> new User(rs.getInt("id"), rs.getString("name"), rs.getString("job")),
+                    (rs, rowNum) -> {
+                        User u = new User();
+                        u.setId(rs.getInt("id"));
+                        u.setName(rs.getString("name"));
+                        u.setJob(rs.getString("job"));
+                        return u;
+                    },
                     id
             );
             return ApiResponse.<User>builder().code(200).message("查询成功").data(user).build();
@@ -75,6 +92,8 @@ public class DbController {
     }
 
     @PostMapping("/users")
+    @RequirePermission("db:write")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     @Operation(summary = "新增用户", description = "添加新用户到数据库")
     public ApiResponse<User> addUser(@RequestBody User user) {
         try {
@@ -206,7 +225,13 @@ public class DbController {
             }
 
             List<User> users = jdbcTemplate.query(dataSql,
-                    (rs, rowNum) -> new User(rs.getInt("id"), rs.getString("name"), rs.getString("job")),
+                    (rs, rowNum) -> {
+                        User user = new User();
+                        user.setId(rs.getInt("id"));
+                        user.setName(rs.getString("name"));
+                        user.setJob(rs.getString("job"));
+                        return user;
+                    },
                     dataParams);
 
             // 构建分页响应
