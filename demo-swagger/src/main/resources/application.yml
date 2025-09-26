@@ -217,3 +217,44 @@ jwt:
   expiration: 24
   # JWT 刷新令牌过期时间（天）
   refresh-expiration: 7
+
+# 文件存储配置
+file:
+  # 文件存储根目录
+  storage:
+    # 上传文件存储路径
+    upload-path: ${user.home}/demo-files/upload
+    # 下载文件存储路径
+    download-path: ${user.home}/demo-files/download
+    # 临时文件存储路径
+    temp-path: ${user.home}/demo-files/temp
+    # 报表文件存储路径
+    report-path: ${user.home}/demo-files/report
+  # 文件上传限制
+  upload:
+    # 单个文件大小限制（MB）
+    max-file-size: 10
+    # 请求总大小限制（MB）
+    max-request-size: 50
+    # 允许的文件类型
+    allowed-types: 
+      - txt
+      - pdf
+      - doc
+      - docx
+      - xls
+      - xlsx
+      - jpg
+      - jpeg
+      - png
+      - gif
+      - zip
+      - rar
+  # 文件下载配置
+  download:
+    # 是否启用断点续传
+    enable-resume: true
+    # 缓冲区大小（KB）
+    buffer-size: 8
+    # 大文件缓冲区大小（KB）
+    large-buffer-size: 16

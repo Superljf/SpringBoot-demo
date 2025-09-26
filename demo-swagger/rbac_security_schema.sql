@@ -117,7 +117,10 @@ INSERT INTO `t_permission` (`permission_code`, `permission_name`, `type`, `path`
 ('actuator:read', 'Actuator查看', 3, '/actuator/**', 'GET', '查看Actuator端点'),
 ('log:read', '日志查看', 3, '/log-demo/**', 'GET', '查看日志演示'),
 ('schedule:read', '任务查看', 3, '/schedule/**', 'GET', '查看定时任务'),
-('schedule:write', '任务管理', 3, '/schedule/**', 'POST,PUT,DELETE', '管理定时任务');
+('schedule:write', '任务管理', 3, '/schedule/**', 'POST,PUT,DELETE', '管理定时任务'),
+('file:download', '文件下载', 3, '/file/download/**', 'GET', '下载文件权限'),
+('file:list', '文件列表', 3, '/file/list', 'GET', '查看文件列表权限'),
+('file:report', '报表下载', 3, '/file/download/report', 'POST', '生成并下载报表权限');
 
 -- 插入默认用户（密码:123456, 已BCrypt加密）
 INSERT INTO `t_user` (`name`, `job`, `username`, `password`, `email`, `phone`, `status`) VALUES 
@@ -143,7 +146,10 @@ INSERT INTO `t_role_permission` (`role_id`, `permission_id`, `create_by`) VALUES
 (2, (SELECT id FROM t_permission WHERE permission_code = 'db:read'), 'system'),
 (2, (SELECT id FROM t_permission WHERE permission_code = 'monitor:read'), 'system'),
 (2, (SELECT id FROM t_permission WHERE permission_code = 'log:read'), 'system'),
-(2, (SELECT id FROM t_permission WHERE permission_code = 'schedule:read'), 'system');
+(2, (SELECT id FROM t_permission WHERE permission_code = 'schedule:read'), 'system'),
+(2, (SELECT id FROM t_permission WHERE permission_code = 'file:download'), 'system'),
+(2, (SELECT id FROM t_permission WHERE permission_code = 'file:list'), 'system'),
+(2, (SELECT id FROM t_permission WHERE permission_code = 'file:report'), 'system');
 
 -- 访客权限
 INSERT INTO `t_role_permission` (`role_id`, `permission_id`, `create_by`) VALUES 
@@ -151,7 +157,8 @@ INSERT INTO `t_role_permission` (`role_id`, `permission_id`, `create_by`) VALUES
 (3, (SELECT id FROM t_permission WHERE permission_code = 'db:read'), 'system'),
 (3, (SELECT id FROM t_permission WHERE permission_code = 'monitor:read'), 'system'),
 (3, (SELECT id FROM t_permission WHERE permission_code = 'log:read'), 'system'),
-(3, (SELECT id FROM t_permission WHERE permission_code = 'schedule:read'), 'system');
+(3, (SELECT id FROM t_permission WHERE permission_code = 'schedule:read'), 'system'),
+(3, (SELECT id FROM t_permission WHERE permission_code = 'file:list'), 'system');
 
 -- 重新开启外键检查
 SET FOREIGN_KEY_CHECKS = 1;
