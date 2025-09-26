@@ -180,6 +180,53 @@ public class FileService {
     }
 
     /**
+     * 生成学员状态报表
+     */
+    public Path generateStudentStatusReport(String buId, Map<String, Object> searchForm) throws IOException {
+        // 生成报表文件名
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        String fileName = String.format("student_status_report_%s.csv", timestamp);
+
+        // 确保临时目录存在
+        String tempPath = getTempPath();
+        ensureDirectoryExists(tempPath);
+
+        // 创建报表文件
+        Path filePath = Paths.get(tempPath, fileName);
+
+        try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(filePath, StandardCharsets.UTF_8))) {
+            // CSV头部
+            writer.println("学员ID,学员姓名,状态,业务单元,创建时间,更新时间");
+
+            // 模拟生成学员状态数据（实际项目中这里会查询数据库）
+            String[] statuses = {"在读", "休学", "毕业", "退学"};
+            String[] businessUnits = {"BU001", "BU002", "BU003", "BU004"};
+            String[] names = {"张三", "李四", "王五", "赵六", "钱七", "孙八", "周九", "吴十"};
+            
+            // 根据搜索条件生成相应数量的数据
+            int recordCount = searchForm != null && searchForm.containsKey("recordCount") ? 
+                (Integer) searchForm.get("recordCount") : 50;
+                
+            for (int i = 1; i <= recordCount; i++) {
+                String studentId = String.format("STU%06d", i);
+                String name = names[i % names.length];
+                String status = statuses[i % statuses.length];
+                String businessUnit = buId != null ? buId : businessUnits[i % businessUnits.length];
+                String createTime = LocalDateTime.now().minusDays(i).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                String updateTime = LocalDateTime.now().minusHours(i).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                
+                writer.printf("%s,%s,%s,%s,%s,%s%n",
+                        studentId, name, status, businessUnit, createTime, updateTime);
+            }
+
+            writer.flush();
+            log.info("学员状态报表生成成功: {}", filePath);
+        }
+
+        return filePath;
+    }
+
+    /**
      * 创建测试文件（用于演示）
      */
     public void createTestFiles() {
